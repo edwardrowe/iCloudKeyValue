@@ -26,9 +26,18 @@ public static class SomeClass
 	[DllImport ("__Internal")]
 	private static extern void iCloudKV_Reset();
 	
+	[DllImport ("__Internal")]
+	private static extern int iCloudKV_SyncCount();
+	
+	[DllImport ("__Internal")]
+ 	private static extern bool iCloudKV_Init();
+	
 	// Use this for initialization
+	// this example is bugged, that's why is forked it and added SyncCount and init function
+	// instead make a coroutline and wait for sync. yield return new WaitUntil(()=> iCloudKV_SyncCount() > iCloudSyncCount); after your merge logic is done set iCloudSyncCount = iCloudKV_SyncCount();
+	
 	void Start () {
-		iCloudKV_Synchronize();
+	  iCloudKV_Synchronize(); // this is a async call, this bugs when its accessed before its synced after app install, it takes a few seconds.
 	  int test = iCloudKV_GetInt("test");
 	  Debug.Log("iCloud Key-Value test: " + test);
 	  test++;
