@@ -10,44 +10,47 @@
 #import <Foundation/Foundation.h>
 #import "iCloudKV.h"
 @implementation iCloudKV
-bool isSynced = false;
+int syncCount = 0; 
 iCloudKV *instance;
 
 - (id)init {
     NSLog(@"%s", __PRETTY_FUNCTION__);
     self = [super init];
-    //    if([[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil]){
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyValueStoreChanged:)
-                                                 name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
-                                               object:[NSUbiquitousKeyValueStore defaultStore]];
     
-    [[NSUbiquitousKeyValueStore defaultStore] synchronize];
-    //    }else{
-    //        NSLog(@"iCloud is not enabled");
-    //    }
-    NSLog(@"iCloudKV - synchronize");
+    if([[NSFileManager defaultManager] ubiquityIdentityToken]){
+        NSLog(@"iCloud is enabled");
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(keyValueStoreChanged:)
+                                                     name:NSUbiquitousKeyValueStoreDidChangeExternallyNotification
+                                                   object:[NSUbiquitousKeyValueStore defaultStore]];
+        
+        [[NSUbiquitousKeyValueStore defaultStore] synchronize];
+    }else{
+        NSLog(@"iCloud is not enabled");
+        syncCount++;
+    }
+    
     return self;
 }
 
 -(void)keyValueStoreChanged:(NSNotification*)notification
 {
     NSLog(@"%s", __PRETTY_FUNCTION__);
-    isSynced = true;
-//    NSNumber *reason = [[notification userInfo] objectForKey:NSUbiquitousKeyValueStoreChangeReasonKey];
-//
-//    if (reason){
-//        NSInteger reasonValue = [reason integerValue];
-//        NSLog(@"keyValueStoreChanged with reason %ld", (long)reasonValue);
-//
-//        if (reasonValue == NSUbiquitousKeyValueStoreInitialSyncChange){
-//            NSLog(@"Initial sync");
-//        }else if (reasonValue == NSUbiquitousKeyValueStoreServerChange){
-//            NSLog(@"Server change sync");
-//        }else{
-//            NSLog(@"Another reason");
-//        }
-//    }
+    syncCount++;
+    NSNumber *reason = [[notification userInfo] objectForKey:NSUbiquitousKeyValueStoreChangeReasonKey];
+
+    if (reason){
+        NSInteger reasonValue = [reason integerValue];
+        NSLog(@"keyValueStoreChanged with reason %ld", (long)reasonValue);
+
+        if (reasonValue == NSUbiquitousKeyValueStoreInitialSyncChange){
+            NSLog(@"Initial sync");
+        }else if (reasonValue == NSUbiquitousKeyValueStoreServerChange){
+            NSLog(@"Server change sync");
+        }else{
+            NSLog(@"Another reason");
+        }
+    }
 }
 
 @end
@@ -124,7 +127,6 @@ void iCloudKV_Reset() {
     [[NSUbiquitousKeyValueStore defaultStore] synchronize];
 }
 
-bool iCloudKV_isSynced(){
-    return isSynced;
+int iCloudKV_SyncCount(){ 
+    return syncCount;
 }
-
