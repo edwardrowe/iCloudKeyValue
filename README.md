@@ -2,7 +2,7 @@
 Tiny Unity plugin to add support for Apple iCloud Key-Value storage (iOS/OSX)
 
 ## iOS
-Drag&Drop `iCloudKeyValue/Plugin.m` to `Plugins/iOS` in Unity. Add function signatures to your C# class.
+Drag&Drop `iCloudKeyValue/iCloudKV.m` to `Plugins/iOS` in Unity. Add function signatures to your C# class.
 ```C#
 using UnityEngine;
 using System.Runtime.InteropServices;
